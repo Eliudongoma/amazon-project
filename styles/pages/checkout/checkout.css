@@ -205,7 +205,23 @@
   padding-top: 12px;
   padding-bottom: 12px;
   border-radius: 8px;
-
   margin-top: 11px;
   margin-bottom: 15px;
 }
+.quantity-input{
+  width: 30px;
+  border: 1px solid rgb(182, 181, 181);
+  border-radius: 2px;
+  display: none;
+}
+.save-quantity-input{
+  display: none;
+}
+.is-editing-quantity{
+  display: initial;
+}
+.toggle-save-link{
+  display: none;
+}
+
+
