@@ -4,6 +4,8 @@ import { formatCurrency } from "./utils/money.js";
 
 let cartSummaryHTML = ``;
 let matchingProduct;
+let new_quantity = 0;
+let error_message = ``;
 
 cart.forEach((cartitem) =>{
   const {productId} = cartitem;
@@ -19,7 +21,6 @@ cart.forEach((cartitem) =>{
     <div class="delivery-date">
       Delivery date: Tuesday, June 21
     </div>
-
     <div class="cart-item-details-grid">
       <img class="product-image"
         src="${matchingProduct.image}">
@@ -38,11 +39,12 @@ cart.forEach((cartitem) =>{
           <span class="update-quantity-link link-primary js-update-link js-update-link-${matchingProduct.id}" data-product-id="${matchingProduct.id}"">
             Update
           </span>
-          <input type="text" class="quantity-input js-quantity-input-${matchingProduct.id}">
+          <input type="text" class="quantity-input js-quantity-input-${matchingProduct.id} js-quantity-input" data-product-id="${matchingProduct.id}">
           <span class="save-quantity-input link-primary js-save-link js-save-link-${matchingProduct.id}" data-product-id="${matchingProduct.id}">save</span>
           <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${matchingProduct.id}">
             Delete
           </span>
+          <div class="error-message js-error-message-${matchingProduct.id}"></div>
         </div>
       </div>
 
@@ -108,7 +110,7 @@ document.querySelectorAll('.js-delete-link').forEach((link) => {
 })
 updateCartQuantity();
 function updateCartQuantity(){
-  document.querySelector('.js-total-quantity').innerHTML = cart_quantity() + ' item(s)';
+  document.querySelector('.js-total-quantity').innerHTML = cart_quantity() + ' item(s)';  
 }
 document.querySelectorAll('.js-update-link').forEach((link) => {
   link.addEventListener('click', () => {
@@ -120,15 +122,52 @@ document.querySelectorAll('.js-update-link').forEach((link) => {
 })
 document.querySelectorAll('.js-save-link').forEach((link) => {
   link.addEventListener('click', () =>{
-    const {productId} = link.dataset;
-    document.querySelector(`.js-quantity-input-${productId}`).classList.remove('is-editing-quantity');
-    document.querySelector(`.js-save-link-${productId}`).classList.remove('is-editing-quantity');   
-    document.querySelector(`.js-update-link-${productId}`).classList.remove('toggle-save-link');
-    let new_quantity = Number(document.querySelector(`.js-quantity-input-${productId}`).value);
-    updateQuantity(productId, new_quantity);
-    document.querySelector(`.js-quantity-label-${productId}`).innerHTML = new_quantity;
-    updateCartQuantity();
+    const {productId} = link.dataset;    
+    quantityInput(productId);
   });
-  
-
 })
+function removeClass(product_Id){
+    document.querySelector(`.js-quantity-input-${product_Id}`).classList.remove('is-editing-quantity');
+    document.querySelector(`.js-save-link-${product_Id}`).classList.remove('is-editing-quantity');   
+    document.querySelector(`.js-update-link-${product_Id}`).classList.remove('toggle-save-link');
+}
+
+function validateQuantity(newQuantity){
+  let quantity = 0;
+  if(!(newQuantity >= 0 && newQuantity < 1000))
+    error_message = "Quantity is below 0 or above 1000!!";
+  else
+    error_message = ``;
+  return quantity = newQuantity;  
+}
+
+document.querySelectorAll(`.js-quantity-input`).forEach(input => {
+    input.addEventListener('keyup',(events) =>{
+      const {productId} = input.dataset;
+      if(events.key === 'Enter'){
+       quantityInput(productId);
+      }
+    })
+});
+function quantityInput (product_Id){
+  new_quantity = Number(document.querySelector(`.js-quantity-input-${product_Id}`).value);  
+  new_quantity = validateQuantity(new_quantity);
+
+  if(!errorMessage(product_Id)){
+    removeClass(product_Id);
+  }
+  updateQuantity(product_Id, new_quantity);
+  document.querySelector(`.js-quantity-label-${product_Id}`).innerHTML = new_quantity;
+  updateCartQuantity();  
+}
+function errorMessage(product_Id){
+  let isError = false;
+  if(error_message){
+    document.querySelector(`.js-error-message-${product_Id}`).innerHTML = error_message;
+    isError = true;
+  }else{
+    document.querySelector(`.js-error-message-${product_Id}`).innerHTML = '';
+    isError = false;
+  }  
+  return isError;
+}
