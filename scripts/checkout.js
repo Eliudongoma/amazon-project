@@ -110,6 +110,7 @@ function updateCartQuantity(){
   document.querySelector('.js-total-quantity').innerHTML = `${cart_quantity()} item(s)`;  
   document.querySelector('.js-number-of-items').innerHTML = `item(s): ${cart_quantity()}`;  
   document.querySelector('.js-total').innerHTML = `$${formatCurrency(total)}`;
+
 }
 document.querySelectorAll('.js-update-link').forEach((link) => {
   link.addEventListener('click', () => {
@@ -117,6 +118,7 @@ document.querySelectorAll('.js-update-link').forEach((link) => {
     document.querySelector(`.js-quantity-input-${productId}`).classList.add('is-editing-quantity');
     document.querySelector(`.js-save-link-${productId}`).classList.add('is-editing-quantity');   
     document.querySelector(`.js-update-link-${productId}`).classList.add('toggle-save-link');
+    matchProducts(productId, selectProduct(productId));
   });    
 })
 document.querySelectorAll('.js-save-link').forEach((link) => {
@@ -133,13 +135,15 @@ function removeClass(product_Id){
 
 function validateQuantity(newQuantity){
   let quantity = 0;
-  if(!(newQuantity >= 0 && newQuantity < 1000))
+  if(!(newQuantity >= 0 && newQuantity < 1000)){
     error_message = "Quantity is below 0 or above 1000!!";
-  else
+    return 0;
+  }
+  else{
     error_message = ``;
-  return quantity = newQuantity;  
+    return quantity = newQuantity;  
+  }
 }
-
 document.querySelectorAll(`.js-quantity-input`).forEach(input => {
     input.addEventListener('keyup',(events) =>{
       const {productId} = input.dataset;
@@ -154,12 +158,13 @@ function quantityInput (product_Id){
   new_quantity = validateQuantity(new_quantity);
 
   if(!errorMessage(product_Id))
-      removeClass(product_Id);
-  
+      removeClass(product_Id); 
+   
   updateQuantity(product_Id, new_quantity);
   document.querySelector(`.js-quantity-label-${product_Id}`).innerHTML = new_quantity;
-  matchProducts(product_Id, new_quantity);
+  matchProducts(product_Id, selectProduct(product_Id));
   updateCartQuantity();  
+  
 }
 function errorMessage(product_Id){
   let isError = false;
@@ -172,12 +177,21 @@ function errorMessage(product_Id){
   }  
   return isError;
 }
+function selectProduct(productId){
+  let quantity = 0;
+  cart.forEach(items => {
+    if(items.productId === productId){
+      quantity = items.quantity;
+    }
+  });
+  return quantity;
+}
 function matchProducts(productId, quantity){
   products.forEach((product) =>{
     if(product.id === productId){
       matchingProduct = product;
       products['total'] = quantity * product.priceCents;
-    }          
+    }
   });
   total += products.total;
 }

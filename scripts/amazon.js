@@ -58,6 +58,7 @@ products.forEach((product) => {
   
 });
 let id;
+let timers = [];
 
 document.querySelector('.js-products-grid').innerHTML = productsHTML;
 
@@ -70,8 +71,6 @@ document.querySelectorAll('.js-add-to-cart').forEach((button) => {
   button.addEventListener('click', () =>{
     const productId = button.dataset.productId;
    
-    clearTimeout(id);
-          
     const selectorQuantity = Number(document.querySelector(`.js-quantity-selector-${productId}`).value);
 
     const added = document.querySelector(`.js-added-to-cart-${productId}`); 
@@ -81,9 +80,19 @@ document.querySelectorAll('.js-add-to-cart').forEach((button) => {
     updateCartQuantity();
   });
 });
+setInterval(() => {
+  timers.forEach(timer => {
+    timer.time -= 1000;
+    if(timer.time === 0)
+      clearTimeout(timer.id);
+  });
+}, 1000);
+
 function clearId(added){    
   added.classList.add('js-added-to-cart');
+  let time = 2000;
     id = setTimeout(() => {
       added.classList.remove('js-added-to-cart');
-    }, 2000); 
+    }, time); 
+    timers.push([id,time]);
 }
