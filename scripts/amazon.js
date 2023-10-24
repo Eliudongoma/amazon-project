@@ -70,7 +70,7 @@ document.querySelectorAll('.js-add-to-cart').forEach((button) => {
   button.addEventListener('click', () =>{
     const productId = button.dataset.productId;
    
-    clearTimeout(timeId);
+    clearTimeout(id);
           
     const selectorQuantity = Number(document.querySelector(`.js-quantity-selector-${productId}`).value);
 

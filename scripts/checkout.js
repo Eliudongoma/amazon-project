@@ -6,15 +6,12 @@ let cartSummaryHTML = ``;
 let matchingProduct;
 let new_quantity = 0;
 let error_message = ``;
+let total = 0;
 
 cart.forEach((cartitem) =>{
   const {productId} = cartitem;
-
-  products.forEach((product) =>{
-    if(product.id === productId){
-      matchingProduct = product;
-    }
-  });
+  matchProducts(productId, cartitem.quantity);
+  
   cartSummaryHTML +=
   `<div class="cart-item-container 
     js-cart-item-container-${matchingProduct.id}">
@@ -101,7 +98,7 @@ document.querySelector('.js-order-summary').innerHTML = cartSummaryHTML;
 
 document.querySelectorAll('.js-delete-link').forEach((link) => {
   link.addEventListener('click', () => {
-    const productId = link.dataset.productId;
+    const {productId} = link.dataset;
     removeFromCart(productId);
     const container = document.querySelector(`.js-cart-item-container-${productId}`);
     container.remove();
@@ -109,8 +106,10 @@ document.querySelectorAll('.js-delete-link').forEach((link) => {
   });
 })
 updateCartQuantity();
-function updateCartQuantity(){
-  document.querySelector('.js-total-quantity').innerHTML = cart_quantity() + ' item(s)';  
+function updateCartQuantity(){  
+  document.querySelector('.js-total-quantity').innerHTML = `${cart_quantity()} item(s)`;  
+  document.querySelector('.js-number-of-items').innerHTML = `item(s): ${cart_quantity()}`;  
+  document.querySelector('.js-total').innerHTML = `$${formatCurrency(total)}`;
 }
 document.querySelectorAll('.js-update-link').forEach((link) => {
   link.addEventListener('click', () => {
@@ -150,14 +149,16 @@ document.querySelectorAll(`.js-quantity-input`).forEach(input => {
     })
 });
 function quantityInput (product_Id){
+  total = 0;
   new_quantity = Number(document.querySelector(`.js-quantity-input-${product_Id}`).value);  
   new_quantity = validateQuantity(new_quantity);
 
-  if(!errorMessage(product_Id)){
-    removeClass(product_Id);
-  }
+  if(!errorMessage(product_Id))
+      removeClass(product_Id);
+  
   updateQuantity(product_Id, new_quantity);
   document.querySelector(`.js-quantity-label-${product_Id}`).innerHTML = new_quantity;
+  matchProducts(product_Id, new_quantity);
   updateCartQuantity();  
 }
 function errorMessage(product_Id){
@@ -171,3 +172,14 @@ function errorMessage(product_Id){
   }  
   return isError;
 }
+function matchProducts(productId, quantity){
+  products.forEach((product) =>{
+    if(product.id === productId){
+      matchingProduct = product;
+      products['total'] = quantity * product.priceCents;
+    }          
+  });
+  total += products.total;
+}
+
+
